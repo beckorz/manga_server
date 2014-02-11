@@ -5,64 +5,82 @@ require_once 'sqlite.php';
 $enc = "eucjp-win, sjis-win, ASCII, JIS, UTF-8, EUC-JP, SJIS";
 
 function is_iphone() {
-  return (bool) strpos($_SERVER['HTTP_USER_AGENT'],'iPhone');
+    return (bool) strpos($_SERVER['HTTP_USER_AGENT'],'iPhone');
 }
 
 function is_ipad() {
-  return (bool) strpos($_SERVER['HTTP_USER_AGENT'],'iPad');
+    return (bool) strpos($_SERVER['HTTP_USER_AGENT'],'iPad');
 }
 
 function is_image($filename, $image_ext) {
-  $filename = trim($filename);
-  $ext = get_ext($filename);
-  return in_array($ext, $image_ext);
+    $filename = trim($filename);
+    $ext = get_ext($filename);
+    return in_array($ext, $image_ext);
+}
+
+function is_OnWindows() {
+    if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 function get_ext($filename) {
-  $filename = trim($filename);
-  return substr(strrchr($filename, '.'), 1);
+    $filename = trim($filename);
+    return substr(strrchr($filename, '.'), 1);
 }
 
 function get_filename($filename) {
-  $filename = trim($filename);
-  return end(explode('/', $filename));
-
+    $filename = trim($filename);
+    return end(explode('/', $filename));
 }
 
 function get_filename_without_ext($filename) {
-  $filename = trim($filename);
-  #pathinfo が日本語パスだとうまくいかなかった。
-  $path = explode('/', $filename);
-  return strstr(end($path), '.', true);
+    $filename = trim($filename);
+    #pathinfo が日本語パスだとうまくいかなかった。
+    $path = explode('/', $filename);
+    return strstr(end($path), '.', true);
 }
 
 function is_jpg($ext) {
-  if (strcasecmp($ext, "jpg") === 0) {
-    return true;
-  } else if (strcasecmp($ext, "jpeg") === 0) {
-    return true;
-  } else {
-    return false;
-  }
+    if (strcasecmp($ext, "jpg") === 0) {
+        return true;
+    } else if (strcasecmp($ext, "jpeg") === 0) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 function is_png($ext) {
-  if (strcasecmp($ext, "png") === 0) {
-    return true;
-  } else {
-    return false;
-  }
+    if (strcasecmp($ext, "png") === 0) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 function cache_clean() {
-  if (dir_size(CACHE) > CACHELIMIT) {
-    // キャッシュディレクトリ内には画像のみ格納するよう変更したので戻す。
-    shell_exec('rm -f '.CACHE.'/*');
-    init_tables();
-    return true;
-  } else {
-    return false;
-  }
+    // キャッシュディレクトリが上限サイズを超えている場合
+    $file = Log::factory('file', LOG_DIR.'/'.date('Y-m-d').'.log', 'view');
+    if (dir_size(CACHE) > CACHELIMIT) {
+        $file->log('cacheサイズオーバー'); 
+        // キャッシュディレクトリ内には画像のみ格納するよう変更したので戻す。
+        if (is_OnWindows()) {
+            // Win系
+            shell('rmdir '. CACHE . ' /s /q');
+            shell('mkdir '. CACHE . '');
+        } else {
+            // Linux系
+            shell('rm -f '.CACHE.'/*');
+        }
+        init_tables(); // 初期化
+        return true;
+    } else {
+        // ディレクトリサイズが制限値より低い場合
+        return false;
+    }
 }
 
 function dir_size($dir) {
@@ -80,6 +98,30 @@ function dir_size($dir) {
 
   return $mas;
 }
+
+// Shellコマンド実行
+function shell($cmd) {
+    // キャッシュディレクトリ内には画像のみ格納するよう変更したので戻す。
+    $file = Log::factory('file', LOG_DIR.'/'.date('Y-m-d').'.log', 'SQLite');
+//    if (is_OnWindows()) {
+//        // Win系
+//        $r = system($cmd);
+//        if (!$r) {
+//            return false;
+//        } else {
+//            return $r;
+//        }
+//    } else {
+        // Linux系
+        $r = shell_exec($cmd);
+        if (is_null($r)) {
+            return false;
+        } else {
+            return $r;
+        }
+//    }
+}
+
 
 function get_dir_tree_old() {
   if (!$handle = fopen(DIRTREE, "rb")) {
@@ -103,8 +145,11 @@ function dir_tree() {
 }
 
 function dir_tree_callback($path) {
+  mb_language("Japanese");	// Windows版xamppでmstringの設定がおかしい時があるので、明示的に入れてみる。
   $length = mb_strlen(COMIC_DIR."/");
   $path = trim(mb_substr($path, $length));
+  $path = mb_convert_encoding($path, "UTF-8", "auto");
+  //    	print();
   $title = get_filename_without_ext($path);
   query("INSERT INTO comics (title, zip_path) values ('".$title."', '".$path."')");
 }
@@ -230,12 +275,16 @@ function fn_directory_recursion($target, $pattern, $callback='', $args=null)
   //ディレクトリ内のファイル名を１つずつを取得
   $node = scandir($target);
   $node_count = count($node);
+  mb_language("Japanese");	// Windows版xamppでmstringの設定がおかしい時があるので、明示的に入れてみる。
   for ($i = 0; $i < $node_count; $i++) {
     if ($node[$i] !== '.' && $node[$i] !== '..') {
+//  echo "■<br />";
+//    	print(mb_convert_encoding($node[$i], "UTF-8", "auto"));
+//  echo "■<br />";
+//      $nodes[] = mb_convert_encoding($node[$i], "UTF-8", "auto"); //ファイルリスト作成
       $nodes[] = $node[$i]; //ファイルリスト作成
-    } 
+    }
   }
-
 	//ファイルリストをチェック
 	foreach ($nodes as $node) {
 		$path = $target.$node;
@@ -246,10 +295,10 @@ function fn_directory_recursion($target, $pattern, $callback='', $args=null)
 				fn_directory_recursion($path, $pattern, $callback, $args);
 			}
 		} else if(is_file($path)) {
-			//ディレクトリの場合、一致パターンだけ有効
+			//ファイルの場合、一致パターンだけ有効
 			if (is_pattern_match($pattern, $node)) {
 				if (is_array($callback)) {
-					//正しいものとしてチェックを行わない。
+					// 正しいものとしてチェックを行わない。
 					$instace = $callback[0];
 					$method = $callback[1];
 					$instace->$method($path,$args);

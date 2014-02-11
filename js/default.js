@@ -314,6 +314,9 @@ $(function(){
           move_file("undefined", 1);
         }
       }, error: function(e) {
+      	// 何かエラー
+          console.log(e.responseText)
+          alert('error');
       }
     });
   }
