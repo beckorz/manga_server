@@ -63,9 +63,7 @@ function is_png($ext) {
 
 function cache_clean() {
     // キャッシュディレクトリが上限サイズを超えている場合
-    $file = Log::factory('file', LOG_DIR.'/'.date('Y-m-d').'.log', 'view');
     if (dir_size(CACHE) > CACHELIMIT) {
-        $file->log('cacheサイズオーバー'); 
         // キャッシュディレクトリ内には画像のみ格納するよう変更したので戻す。
         if (is_OnWindows()) {
             // Win系
@@ -102,24 +100,12 @@ function dir_size($dir) {
 // Shellコマンド実行
 function shell($cmd) {
     // キャッシュディレクトリ内には画像のみ格納するよう変更したので戻す。
-    $file = Log::factory('file', LOG_DIR.'/'.date('Y-m-d').'.log', 'SQLite');
-//    if (is_OnWindows()) {
-//        // Win系
-//        $r = system($cmd);
-//        if (!$r) {
-//            return false;
-//        } else {
-//            return $r;
-//        }
-//    } else {
-        // Linux系
-        $r = shell_exec($cmd);
-        if (is_null($r)) {
-            return false;
-        } else {
-            return $r;
-        }
-//    }
+    $r = shell_exec($cmd);
+    if (is_null($r)) {
+        return false;
+    } else {
+        return $r;
+    }
 }
 
 
@@ -145,7 +131,7 @@ function dir_tree() {
 }
 
 function dir_tree_callback($path) {
-  mb_language("Japanese");	// Windows版xamppでmstringの設定がおかしい時があるので、明示的に入れてみる。
+  mb_language("Japanese");	// Windows版xamppでmbstringの設定がおかしい時があるので、明示的に入れてみる。
   $length = mb_strlen(COMIC_DIR."/");
   $path = trim(mb_substr($path, $length));
   $path = mb_convert_encoding($path, "UTF-8", "auto");

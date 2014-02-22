@@ -62,7 +62,7 @@
       $count = 1;
       $previous_path = null;
       foreach ($tree as $t) {
-        $path = explode("/", $t);
+        $path = explode("/", $t['zip_path']);
         $steps = count($path);
 
         $current_path = '';
@@ -85,7 +85,7 @@
           echo '<ul>';
         }
 
-        echo '<li><a id="comic_'.$count.'" class="comic_title" title="'.$t.'">'.$t.'</a></li>';
+        echo '<li><a id="comic_'.$count.'" class="comic_title" title="'.$t['zip_path'].'">'.$t['title'].'</a></li>';
 
         $previous_path = $current_path;
         $count++;

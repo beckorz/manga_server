@@ -286,8 +286,15 @@ $(function(){
 
   // ページの取得
   function get_page(id, page) {
+    $.blockUI({
+        message: '<div><img src="images/loading.gif" style="margin-right:5px;">データ取得処理中...</div>',
+        css: {
+            padding:'25px'
+        }
+    });
     $.ajax({ url: "view.php", data: "id=" + id + "&page=" + page,
       success: function(json) {
+        $.unblockUI();
         if (json.msg !== "ERROR") {
 
           set_current_title(id, json.title);
@@ -315,8 +322,9 @@ $(function(){
         }
       }, error: function(e) {
       	// 何かエラー
+          $.unblockUI();
           console.log(e.responseText)
-          alert('error');
+          alert('error\n再度実行しても、エラーになる場合、管理者に連絡して下さい。');
       }
     });
   }

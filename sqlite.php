@@ -1,7 +1,6 @@
 <?php
 	require_once 'settings.php';
 	require_once 'functions.php';
-    require_once 'Log.php';
 
 	/**
 	 * テーブル初期化
@@ -16,7 +15,6 @@
 	 */
 	function create_tables() {
 		// 存在していたら削除する
-        $file = Log::factory('file', LOG_DIR.'/'.date('Y-m-d').'.log', 'SQLite');
         if (file_exists(DB)) {
             // キャッシュディレクトリ内には画像のみ格納するよう変更したので戻す。
             if (is_OnWindows()) {
@@ -25,7 +23,6 @@
                 $r = shell('del '. $dbpath);
             } else {
                 // Linux系
-                // shell_exec('rm -f '.CACHE.'/*');
                 $cmd = 'rm -f '.DB;
                 $r = shell($cmd);
             }
@@ -90,10 +87,12 @@
 
 	// ディレクトリツリーを取得
 	function get_dir_tree() {
-		$results = select("select zip_path from comics");
+		$results = select("select title, zip_path from comics");
 		$tree = array();
-		foreach ($results as $r) {
-			$tree[] = $r["zip_path"];
+        foreach ($results as $r) {
+            $tree[] = array(
+                'title' => $r['title'],
+                'zip_path' => $r['zip_path']);
 		}
 		return $tree;
 	}

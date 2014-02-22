@@ -10,15 +10,10 @@
     require_once 'settings.php';
     require_once 'functions.php';
     require_once 'sqlite.php';
-    require_once 'Log.php';
-
     error_reporting(E_ALL & ~E_STRICT);
 
-    $dir = get_dir_tree(); // ディレクトリリスト取得
+    $dir = get_dir_tree(); // ディレクトリリスト取得(DBキャッシュ側より)
     cache_clean(); // cacheディレクトリ容量を見て、キャッシュの再構築
-
-    $file = Log::factory('file', LOG_DIR.'/'.date('Y-m-d').'.log', 'view');
-    $file->log('view処理開始'); 
 
     // 漫画 ID
     $id = $_GET["id"];
@@ -33,12 +28,11 @@
         $page = 1;
     }
 
-    $zip_path = COMIC_DIR."/".$dir[$id-1];              // 元zipファイルパス取得
+    $zip_path = COMIC_DIR."/".$dir[$id-1]['zip_path'];              // 元zipファイルパス取得
     $manga_title = get_filename_without_ext($zip_path); // 漫画のタイトル取得
 
     // cache ディレクトリに ZIP 内のファイルを展開
     if (!isCached($id)) {
-        $file->log('caching処理開始'); 
         caching($id, $zip_path, $image_ext);
     }
 
@@ -70,7 +64,10 @@
 
     // ZIP ファイル読み込み
     function caching($comics_id, $zip_path, $image_ext) {
-        $zip_path = mb_convert_encoding($zip_path, "SJIS", "auto");
+        if (is_OnWindows()) {
+            // Windowsの場合、ファイル名エンコードをSJIS
+            $zip_path = mb_convert_encoding($zip_path, "SJIS", "auto");
+        }
         $comic = zip_open($zip_path);
         if (!is_resource($comic)) { 
             die("[ERR]ZIP_OPEN : ".$zip_path); 
