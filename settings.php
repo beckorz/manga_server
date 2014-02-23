@@ -47,6 +47,7 @@
     // サーバ上で PHP コマンドが使える場合のみ true にしてください。
     // [注意] Windows での動作未確認。
     define("ASYNC_MAKE_THUMBNAILS", false);
+    define("PHP_PATH", "c:/xampp/php/");	// Windowsで、尚且つ、PHP.exeにパスが通ってない場合、パスさえ通っていれば、ここは空白でも良い
 
     /*----------- 以下の設定はあまりいじらないで ----------*/
 

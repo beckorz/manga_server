@@ -507,7 +507,8 @@ $(function(){
           }
         });
       }, error: function(e) {
-        //console.error(e);
+        console.log(e.responseText)
+        alert('error\n再度実行しても、エラーになる場合、管理者に連絡して下さい。');
       }
     });
   }
