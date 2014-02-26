@@ -26,6 +26,21 @@ $(function(){
   get_covers();
   bookmark();
 
+  // jQuery easing, don't want to add the whole easing plugin
+  $.extend( $.easing, {
+    easeOutExpo: function (x, t, b, c, d) {
+      return (t==d) ? b+c : c * (-Math.pow(2, -10 * t/d) + 1) + b;
+    },
+  });
+
+  $('.contentBody ul').hide();
+  $('.open ul').show();
+
+  $('.toggle').click(function() {
+    $(this).parent().toggleClass('open');
+    $(this).siblings('ul').slideToggle(400, "easeOutExpo")
+  });
+
   /*
    * events
    */

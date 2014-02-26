@@ -74,17 +74,23 @@
 
         if ($previous_path !== $current_path) {
           if (!is_null($previous_path)) {
+            // 1フォルダ分完了
             echo '</ul></section><section>';
+            echo '</div>';
           }
 
-          if (empty($current_path)) {
-            echo '<h1>未分類</h1>';
-          } else {
-            echo '<h1>'.trim($current_path).'</h1>';
-          }
+          // 蔵書タイトル(1フォルダ分)
+          echo '<div class="contentBody">';
+              echo '<div class="toggle hbox">';
+                  echo '<h2 class="boxFlex">';
+                  echo (empty($current_path)) ? '未分類': trim($current_path);
+                  echo '</h2>';
+                  echo '<span class="plus"><img src="images/plus.png"></span>';
+              echo '</div>';
           echo '<ul>';
         }
 
+        // 蔵書リンク
         echo '<li><a id="comic_'.$count.'" class="comic_title" title="'.$t['zip_path'].'">'.$t['title'].'</a></li>';
 
         $previous_path = $current_path;

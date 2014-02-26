@@ -1,5 +1,14 @@
 @charset "utf-8";
 
+* { 
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+         -o-box-sizing: border-box;
+            box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 body {
   width: 100%;
   height: 100%;
@@ -9,6 +18,11 @@ body {
 }
 
 h1 {
+  font-size: 0.9em;
+  margin-top: 5px;
+}
+
+h2 {
   font-size: 0.9em;
   margin-top: 5px;
 }
@@ -38,8 +52,9 @@ a:hover {
   text-align: center;
 
   -webkit-border-radius: 0 0 3px 3px;
-  -moz-border-radius: 0 0 3px 3px;
-  border-radius: 0 0 3px 3px;
+     -moz-border-radius: 0 0 3px 3px;
+       -o-border-radius: 0 0 3px 3px;
+          border-radius: 0 0 3px 3px;
 }
 
 #menu {
@@ -140,8 +155,9 @@ img {
   border-bottom: 1px solid #fff;
   width: 98%;
   -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
-  border-radius: 3px;
+     -moz-border-radius: 3px;
+       -o-border-radius: 3px;
+          border-radius: 3px;
 }
 #help,
 #settings {
@@ -174,7 +190,6 @@ input[type="checkbox"] {
 
 #index img {
   display: block;
-  background: rgba(200, 200, 200, 0.5);
   padding: 2px;
   margin: 3px 0;
 }
@@ -210,3 +225,109 @@ input[type="checkbox"] {
 }
 
 footer{margin:10px; text-align:center;font-size:0.7em;}
+
+/*  */
+.contentBody {
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+.contentBody .toggle {
+  padding: 5px 10px;
+  text-shadow: 1px 1px 0 #fff;
+  background-color: #f2f2f2;
+  background-image: -webkit-linear-gradient(top,#fff 0%,#f2f2f2 100%);
+  background-image:    -moz-linear-gradient(top,#fff 0%,#f2f2f2 100%);
+  background-image:      -o-linear-gradient(top,#fff 0%,#f2f2f2 100%);
+  background-image:         linear-gradient(top,#fff 0%,#f2f2f2 100%);
+  border-width: 1px;
+  border-color: #e6e6e6 #ccc #ccc #e6e6e6;
+  border-style: solid;
+  cursor: pointer;
+  position: relative;
+  z-index: 100;
+  
+  -webkit-border-radius: 5px;
+     -moz-border-radius: 5px;
+       -o-border-radius: 5px;
+          border-radius: 5px;
+  
+  -webkit-transition: -webkit-border-radius 1s 0.4s cubic-bezier(0, 0, 0, 1);
+     -moz-transition:    -moz-border-radius 1s 0.4s cubic-bezier(0, 0, 0, 1);
+       -o-transition:      -o-border-radius 1s 0.4s cubic-bezier(0, 0, 0, 1);
+          transition:         border-radius 1s 0.4s cubic-bezier(0, 0, 0, 1);
+}
+
+/* START hbox/vbox normalization from http://alex.dojotoolkit.org/2009/08/css-3-progress/ */
+/* hbox and vbox classes */
+ 
+.hbox {
+	display: -webkit-box;
+	display:    -moz-box;
+	display:      -o-box;
+	display:         box;
+ 
+	-webkit-box-orient: horizontal;
+	   -moz-box-orient: horizontal;
+	     -o-box-orient: horizontal;
+	        box-orient: horizontal;
+	-webkit-box-align: stretch;
+	   -moz-box-align: stretch;
+	     -o-box-align: stretch;
+	        box-align: stretch;
+ 
+	display: box;
+	box-orient: horizontal;
+	box-align: stretch;
+	
+	width: 100%;
+}
+ 
+.hbox > * {
+	-webkit-box-flex: 0;
+	   -moz-box-flex: 0;
+	     -o-box-flex: 0;
+	        box-flex: 0;
+	display: block;
+}
+
+.boxFlex1, .boxFlex {
+	-webkit-box-flex: 1;
+	   -moz-box-flex: 1;
+	     -o-box-flex: 1;
+	        box-flex: 1;
+	box-flex: 1;
+}
+
+.contentBody.open .plus img {
+  -webkit-transform: rotate(135deg);
+     -moz-transform: rotate(135deg);
+       -o-transform: rotate(135deg);
+          transform: rotate(135deg);
+}
+
+.contentBody.open .toggle {
+  -webkit-border-radius: 5px 5px 0 0;
+     -moz-border-radius: 5px 5px 0 0;
+       -o-border-radius: 5px 5px 0 0;
+          border-radius: 5px 5px 0 0;
+  
+  -webkit-transition: -webkit-border-radius 0s cubic-bezier(0, 0, 0, 1);
+     -moz-transition:    -moz-border-radius 0s cubic-bezier(0, 0, 0, 1);
+       -o-transition:      -o-border-radius 0s cubic-bezier(0, 0, 0, 1);
+          transition:         border-radius 0s cubic-bezier(0, 0, 0, 1);
+}
+
+.contentBody .plus img {
+  vertical-align: middle;
+  
+  -webkit-transform: rotate(0deg);
+     -moz-transform: rotate(0deg);
+       -o-transform: rotate(0deg);
+          transform: rotate(0deg);
+  
+  -webkit-transition: -webkit-transform 0.8s cubic-bezier(0, 0, 0, 1);
+     -moz-transition:    -moz-transform 0.8s cubic-bezier(0, 0, 0, 1);
+       -o-transition:      -o-transform 0.8s cubic-bezier(0, 0, 0, 1);
+          transition:         transform 0.8s cubic-bezier(0, 0, 0, 1);
+}
