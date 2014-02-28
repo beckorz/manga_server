@@ -518,7 +518,7 @@ $(function(){
         $.each(json, function() {
           var _this = this;
           if (_this.data !== "") {
-            $("#comic_" + _this.id).html('<img src="' + _this.data + '" />');
+            $("#comic_" + _this.id).append('<img src="' + _this.data + '" />');
           }
         });
       }, error: function(e) {

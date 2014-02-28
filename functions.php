@@ -62,23 +62,28 @@ function is_png($ext) {
 }
 
 function cache_clean() {
-    // キャッシュディレクトリが上限サイズを超えている場合
     if (dir_size(CACHE) > CACHELIMIT) {
-        // キャッシュディレクトリ内には画像のみ格納するよう変更したので戻す。
-        if (is_OnWindows()) {
-            // Win系
-            shell('rmdir '. CACHE . ' /s /q');
-            shell('mkdir '. CACHE . '');
-        } else {
-            // Linux系
-            shell('rm -f '.CACHE.'/*');
-        }
-        init_tables(); // 初期化
+        // キャッシュディレクトリが上限サイズを超えている場合
+        delete_caches();    // キャッシュ削除
         return true;
     } else {
         // ディレクトリサイズが制限値より低い場合
         return false;
     }
+}
+
+function delete_caches() {
+    if (is_OnWindows()) {
+        // Win系
+        shell('rmdir '. CACHE . ' /s /q');
+        shell('mkdir '. CACHE . '');
+    } else {
+        // Linux系
+        shell('rm -f '.CACHE.'/*');
+    }
+    // init_tables(); // 初期化
+    query("DELETE FROM images");
+    query("UPDATE comics SET pages = NULL");
 }
 
 function dir_size($dir) {

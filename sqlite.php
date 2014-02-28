@@ -1,22 +1,42 @@
 <?php
-	require_once 'settings.php';
-	require_once 'functions.php';
+    require_once 'settings.php';
+    require_once 'functions.php';
 
-	/**
-	 * テーブル初期化
-	 */
-	function init_tables() {
-		create_tables(); // テーブル作成
-		dir_tree();
-	}
+    /**
+     * テーブル初期化
+     */
+    function init_tables() {
+        create_tables(); // テーブル作成
+        dir_tree();
+    }
 
-	/**
-	 * テーブル作成
-	 */
-	function create_tables() {
-		// 存在していたら削除する
+    /**
+     * テーブル作成
+     */
+    function create_tables() {
+        // 作成
+        if (! file_exists(DB)) {
+            $db = new SQLite3(DB);
+        }
+        if (! exists_table("comics")) {
+            $db->exec("BEGIN DEFERRED;");
+            query('CREATE TABLE comics (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, pages INTEGER, zip_path TEXT, cover TEXT);', $db);
+            $db->exec("COMMIT;");
+        }
+        if (! exists_table("images")) {
+            $db->exec("BEGIN DEFERRED;");
+            query('CREATE TABLE images (id INTEGER PRIMARY KEY AUTOINCREMENT, comics_id INTEGER, page INTEGER, filepath TEXT);', $db);
+            $db->exec("COMMIT;");
+        }
+        return true;
+    }
+
+    /**
+     * テーブル削除
+     */
+    function delete_db() {
+        // 存在していたら削除する
         if (file_exists(DB)) {
-            // キャッシュディレクトリ内には画像のみ格納するよう変更したので戻す。
             if (is_OnWindows()) {
                 // Win系
                 $dbpath = preg_replace('/\//', '\\', DB);
@@ -27,13 +47,17 @@
                 $r = shell($cmd);
             }
         }
-        // 作成
-        $db = new SQLite3(DB);
-        $db->exec("BEGIN DEFERRED;");
-        query('CREATE TABLE comics (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, pages INTEGER, zip_path TEXT, cover TEXT);', $db);
-        query('CREATE TABLE images (id INTEGER PRIMARY KEY AUTOINCREMENT, comics_id INTEGER, page INTEGER, filepath TEXT);', $db);
-        $db->exec("COMMIT;");
-        return true;
+    }
+
+    /**
+     * テーブルが存在しているか?
+     *
+     * @param $table_name 確認するテーブル名
+     */
+    function exists_table($table_name) {
+        $sql = "select count(*) as count from sqlite_master where type='table' and name='".$table_name."'";
+        $r = select($sql);
+        return ($r[0]["count"] != 0);
     }
 
 	/**
@@ -63,7 +87,6 @@
 
 	// データ取得
 	function select($query) {
-		//print $query;
 		$db = new SQLite3(DB);
 		$results = $db->query($query);
 
