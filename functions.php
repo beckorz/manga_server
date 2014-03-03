@@ -142,6 +142,8 @@ function dir_tree_callback($path) {
   $path = mb_convert_encoding($path, "UTF-8", "auto");
   //    	print();
   $title = get_filename_without_ext($path);
+  $title = escape($title);
+  $path = escape($path);
   query("INSERT INTO comics (title, zip_path) values ('".$title."', '".$path."')");
 }
 
