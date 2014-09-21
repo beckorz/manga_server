@@ -54,11 +54,7 @@ function is_jpg($ext) {
 }
 
 function is_png($ext) {
-    if (strcasecmp($ext, "png") === 0) {
-        return true;
-    } else {
-        return false;
-    }
+    return (strcasecmp($ext, "png") === 0);
 }
 
 function cache_clean() {
@@ -69,6 +65,22 @@ function cache_clean() {
     } else {
         // ディレクトリサイズが制限値より低い場合
         return false;
+    }
+}
+
+/**
+ * NEWマーク用の出力
+ * return $比較元の日付
+ */
+function output_new_mark($fileTimeCreated) {
+    $basetime1 = strtotime("-".NEW_DATE_TIME1. "day");  // -30
+    $basetime2 = strtotime("-".NEW_DATE_TIME2. "day");  // -15
+    if ($basetime2 <= $fileTimeCreated) {
+        return '<span class="newmark2">new!</span>';
+    } elseif ($basetime1 <= $fileTimeCreated) {
+        return '<span class="newmark1">new!</span>';
+    } else {
+        return '';
     }
 }
 
@@ -136,15 +148,19 @@ function dir_tree() {
 }
 
 function dir_tree_callback($path) {
-  mb_language("Japanese");	// Windows版xamppでmbstringの設定がおかしい時があるので、明示的に入れてみる。
-  $length = mb_strlen(COMIC_DIR."/");
-  $path = trim(mb_substr($path, $length));
-  $path = mb_convert_encoding($path, "UTF-8", "auto");
-  //    	print();
-  $title = get_filename_without_ext($path);
-  $title = escape($title);
-  $path = escape($path);
-  query("INSERT INTO comics (title, zip_path) values ('".$title."', '".$path."')");
+    mb_language("Japanese");    // Windows版xamppでmbstringの設定がおかしい時があるので、明示的に入れてみる。
+    $length = mb_strlen(COMIC_DIR."/");
+
+    $path = trim(mb_substr($path, $length));
+    $group_name = mb_substr($path, 0, mb_strrpos($path, "/"));
+    $group_name = mb_convert_encoding($group_name, "UTF-8", "auto");
+    $file_created = filemtime(COMIC_DIR."/".$path);
+    $file_created = date("Y-m-d\TH:i:s", $file_created);
+    $path = mb_convert_encoding($path, "UTF-8", "auto");
+    $title = get_filename_without_ext($path);
+    $title = escape($title);
+    $path = escape($path);
+    query("INSERT INTO comics (title, group_name, zip_path, created) values ('".$title."', '".$group_name."', '".$path."', '".$file_created."')");
 }
 
 function save_thumbnail($thumb) {
@@ -258,49 +274,48 @@ function d($value) {
  * @param array $args $callbackに渡す引数(可変ではない)
  * @return void
  */
-function fn_directory_recursion($target, $pattern, $callback='', $args=null)
-{
-	if (!is_dir($target)) return false;
+function fn_directory_recursion($target, $pattern, $callback='', $args=null) {
+    if (!is_dir($target)) return false;
 
-	$target = add_last_slash($target); //ディレクトリは最後に/を付加
+    $target = add_last_slash($target); //ディレクトリは最後に/を付加
 
-	$nodes = array();
+    $nodes = array();
   //ディレクトリ内のファイル名を１つずつを取得
   $node = scandir($target);
   $node_count = count($node);
-  mb_language("Japanese");	// Windows版xamppでmstringの設定がおかしい時があるので、明示的に入れてみる。
+  mb_language("Japanese");  // Windows版xamppでmstringの設定がおかしい時があるので、明示的に入れてみる。
   for ($i = 0; $i < $node_count; $i++) {
     if ($node[$i] !== '.' && $node[$i] !== '..') {
 //  echo "■<br />";
-//    	print(mb_convert_encoding($node[$i], "UTF-8", "auto"));
+//      print(mb_convert_encoding($node[$i], "UTF-8", "auto"));
 //  echo "■<br />";
 //      $nodes[] = mb_convert_encoding($node[$i], "UTF-8", "auto"); //ファイルリスト作成
       $nodes[] = $node[$i]; //ファイルリスト作成
     }
   }
-	//ファイルリストをチェック
-	foreach ($nodes as $node) {
-		$path = $target.$node;
-		if (is_dir($path)) {
-			//ディレクトリの場合、除外パターンだけ有効
-			$node = add_last_slash($node); //ディレクトリは最後に/を付加
-			if (is_pattern_match($pattern, $node) !== -1) { //除外以外の場合
-				fn_directory_recursion($path, $pattern, $callback, $args);
-			}
-		} else if(is_file($path)) {
-			//ファイルの場合、一致パターンだけ有効
-			if (is_pattern_match($pattern, $node)) {
-				if (is_array($callback)) {
-					// 正しいものとしてチェックを行わない。
-					$instace = $callback[0];
-					$method = $callback[1];
-					$instace->$method($path,$args);
-				} else {
-					$callback($path,$args); //あるものとして存在チェックは行わない。
-				}
-			}
-		}
-	}
+    //ファイルリストをチェック
+    foreach ($nodes as $node) {
+        $path = $target.$node;
+        if (is_dir($path)) {
+            //ディレクトリの場合、除外パターンだけ有効
+            $node = add_last_slash($node); //ディレクトリは最後に/を付加
+            if (is_pattern_match($pattern, $node) !== -1) { //除外以外の場合
+                fn_directory_recursion($path, $pattern, $callback, $args);
+            }
+        } else if(is_file($path)) {
+            //ファイルの場合、一致パターンだけ有効
+            if (is_pattern_match($pattern, $node)) {
+                if (is_array($callback)) {
+                    // 正しいものとしてチェックを行わない。
+                    $instace = $callback[0];
+                    $method = $callback[1];
+                    $instace->$method($path,$args);
+                } else {
+                    $callback($path,$args); //あるものとして存在チェックは行わない。
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -309,12 +324,11 @@ function fn_directory_recursion($target, $pattern, $callback='', $args=null)
  * @param string $str /を付加する文字列
  * @return string /を最後に付加した文字列
  */
-function add_last_slash($str)
-{
-	if (!preg_match('/\/$/',$str)) {
-		$str .= '/';
-	}
-	return $str;
+function add_last_slash($str) {
+    if (!preg_match('/\/$/',$str)) {
+        $str .= '/';
+    }
+    return $str;
 }
 
 /**
@@ -324,24 +338,22 @@ function add_last_slash($str)
  * @param string $str 調べる文字列
  * @return int -1:除外パターン一致、1:パターン一致、0:一致パターン無し
  */
-function is_pattern_match($pattern, $str)
-{
-	$pats = explode(',',$pattern);
-	foreach ($pats as $pat) {
-		//頭が!で始まるパターンは除外パターン
-		if (preg_match('/^!(.*)/',$pat,$m)) {
-			$pat = $m[1];
-			if (fnmatch($pat, $str)) {
-				return -1; //除外
-			}
-		} else {
-			if (fnmatch($pat, $str)) {
-				return 1; //一致
-			}
-		}
-	}
-	return 0;
+function is_pattern_match($pattern, $str) {
+    $pats = explode(',',$pattern);
+    foreach ($pats as $pat) {
+        //頭が!で始まるパターンは除外パターン
+        if (preg_match('/^!(.*)/',$pat,$m)) {
+            $pat = $m[1];
+            if (fnmatch($pat, $str)) {
+                return -1; //除外
+            }
+        } else {
+            if (fnmatch($pat, $str)) {
+                return 1; //一致
+            }
+        }
+    }
+    return 0;
 }
-
 
 ?>

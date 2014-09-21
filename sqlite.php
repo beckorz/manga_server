@@ -20,7 +20,7 @@
         }
         if (! exists_table("comics")) {
             $db->exec("BEGIN DEFERRED;");
-            query('CREATE TABLE comics (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, pages INTEGER, zip_path TEXT, cover TEXT);', $db);
+            query('CREATE TABLE comics (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, pages INTEGER, group_name TEXT, zip_path TEXT, cover TEXT, created TEXT);', $db);
             $db->exec("COMMIT;");
         }
         if (! exists_table("images")) {
@@ -74,7 +74,6 @@
         // クエリ実行
         if (!$db->exec($query)) {
             $db->exec("ROLLBACK;");
-			die('fatal error: '.$query);
         }
 
         if (!$db_conncted) {
@@ -110,14 +109,20 @@
 
     // ディレクトリツリーを取得
     function get_dir_tree() {
-        $results = select("select title, zip_path from comics");
+        $results = select("select title, group_name, zip_path from comics");
         $tree = array();
         foreach ($results as $r) {
             $tree[] = array(
                 'title' => $r['title'],
+                'group_name' => $r['group_name'],
                 'zip_path' => $r['zip_path']);
         }
         return $tree;
+    }
+
+    function get_commic_group_created($group_name) {
+        $r = select("SELECT MAX(created) AS created FROM comics WHERE group_name = '".$group_name."'");
+        return $r[0]["created"];
     }
 
     // 漫画のタイトルを取得

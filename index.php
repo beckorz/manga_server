@@ -45,12 +45,13 @@
 <?php
   } else {
 ?>
-    <a class="controller next_file next_control left_control">次のファイル</a>
+    <a class="controller next_file next_control left_control">&lt; 次のファイル</a>
     <a id="switch_half_page" class="controller ">単ページ切替</a>
     <a id="paint_index" class="selected">蔵書一覧</a>
     <a id="paint_settings">設定</a>
     <a id="paint_help">使い方</a>
-    <a class="controller previous_file previous_control right_control">前のファイル</a>
+    <span id="current_commic_name"></span>
+    <a class="controller previous_file previous_control right_control">前のファイル &gt;</a>
 <?php
   }
 ?>
@@ -72,6 +73,7 @@
           }
         }
 
+        // 
         if ($previous_path !== $current_path) {
           if (!is_null($previous_path)) {
             // 1フォルダ分完了
@@ -84,6 +86,9 @@
               echo '<div class="toggle hbox">';
                   echo '<h2 class="boxFlex">';
                   echo (empty($current_path)) ? '未分類': trim($current_path);
+                  $created = strtotime(get_commic_group_created($t['group_name'])); // 作成日取得
+                  echo output_new_mark($created);
+
                   echo '</h2>';
                   echo '<span class="plus"><img src="images/plus.png"></span>';
               echo '</div>';

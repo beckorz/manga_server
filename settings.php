@@ -76,6 +76,10 @@
     // log出力先
     define('LOG_DIR', APP_ROOT."/logs");
 
+    // Newの判断基準(日)
+    define('NEW_DATE_TIME1', 30);
+    define('NEW_DATE_TIME2', 15);
+
     /*----------- 初期化 ----------*/
     require_once 'sqlite.php';
     if (!file_exists(DB_DIR)) {
